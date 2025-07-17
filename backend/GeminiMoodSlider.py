@@ -4,20 +4,16 @@ import os
 
 # Load environment variables
 load_dotenv()
+genai.configure()
 
-genai.configure()  
- # just to confirm
+# Choose the model (once)
+model = genai.GenerativeModel("gemini-2.5-pro")
 
-
-
-
-# Choose the model (you can use "gemini-pro" or "gemini-1.5-pro" etc.)
-model = genai.GenerativeModel("gemini-2.5-pro")  # or "gemini-1.5-pro" if you have access
-
-# Generate content
-response = model.generate_content("What is the best way to help people with autism?")
-
-# Print the AI's response
-print(response.text)
-def intepret_emoji_slider():
-    pass
+def interpret_emoji_slider(mood: str, intensity: int):
+    prompt = (
+        f"The user is experiencing {mood} at intensity level {intensity}/10. "
+        "They may be a child or someone with a disability (e.g., Down syndrome, autism). "
+        "Please explain the emotion in a simple, kind, empathetic way using clear language."
+    )
+    response = model.generate_content(prompt)
+    return response.text

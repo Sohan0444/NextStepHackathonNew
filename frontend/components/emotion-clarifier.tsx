@@ -16,22 +16,32 @@ export function EmotionClarifier() {
     if (!selectedMood) return
 
     setIsLoading(true)
-    setTimeout(() => {
-      const explanations = {
-        Happy: `Feeling happy at intensity ${intensity}/10 suggests you're experiencing genuine joy and contentment. This positive emotional state often comes from meaningful connections, accomplishments, or simply appreciating the present moment. Your energy levels are likely elevated, and you may feel more optimistic about challenges ahead.`,
-        Sad: `Experiencing sadness at ${intensity}/10 intensity indicates you're processing difficult emotions or situations. This is a natural human response to loss, disappointment, or unmet expectations. While uncomfortable, sadness helps us process change and can deepen our empathy and self-understanding.`,
-        Angry: `Anger at ${intensity}/10 often signals that your boundaries have been crossed or your values challenged. This emotion can be protective, motivating you to address injustices or make necessary changes. The key is channeling this energy constructively rather than destructively.`,
-        Anxious: `Anxiety at this intensity (${intensity}/10) suggests your mind is anticipating potential threats or uncertainties. While some anxiety is normal and even helpful for motivation, higher levels may indicate your nervous system is in overdrive. This often stems from worry about future events or feeling unprepared.`,
-        Overwhelmed: `Feeling overwhelmed at ${intensity}/10 indicates you're facing more demands than you feel capable of handling right now. This emotional state often occurs when multiple stressors combine, making it difficult to prioritize or see clear solutions. It's your mind's way of signaling the need for rest and reorganization.`,
-        Neutral: `A neutral emotional state at ${intensity}/10 suggests emotional balance and stability. This isn't numbness, but rather a calm, centered feeling where you're neither particularly high nor low. This can be a peaceful state that allows for clear thinking and decision-making.`,
-      }
 
-      setExplanation(
-        explanations[selectedMood.mood as keyof typeof explanations] ||
-          "This emotional state is unique to your experience and deserves attention and care.",
-      )
-      setIsLoading(false)
-    }, 1500)
+    fetch("http://localhost:8000/emotion-clarifier", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        mood: selectedMood.mood,
+        intensity: intensity
+      })
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch explanation")
+        return res.json()
+      })
+      .then((data) => {
+        console.log("💬 Response from backend:", data) // <-- DEBUG LOG HERE
+        setExplanation(data.explanation)
+      })
+      .catch((error) => {
+        console.error("Error fetching explanation:", error)
+        setExplanation("Something went wrong while trying to analyze your mood.")
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }
 
   return (
